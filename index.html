@@ -156,15 +156,13 @@
 
   function checkIfAllSolved() {
     if (solvedCount === allZadania.length) {
-      messageBox.textContent = '<img src="https://i.giphy.com/lkbyJPCrl7GoOZwVRu.webp
- "><br>🎉 Wszystkie zadania zostały rozwiązane!';
+      messageBox.innerHTML = '<img src="https://i.giphy.com/lkbyJPCrl7GoOZwVRu.webp"><br>🎉 Wszystkie zadania zostały rozwiązane!';
     }
   }
 
   // Show message if already all solved
   if (solvedCount === allZadania.length) {
-    messageBox.textContent = '<img src="https://i.giphy.com/lkbyJPCrl7GoOZwVRu.webp
- "><br>🎉 Wszystkie zadania zostały rozwiązane!';
+    messageBox.innerHTML = '<img src="https://i.giphy.com/lkbyJPCrl7GoOZwVRu.webp"><br>🎉 Wszystkie zadania zostały rozwiązane!';
   }
 </script>
 
