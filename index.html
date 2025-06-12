@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Zadania matematyczne</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0fff0;
+      padding: 20px;
+      display: block;
+    }
+    .zadanie {
+      border: 2px solid #a5d6a7;
+      background: #e8f5e9;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      max-width: 500px;
+    }
+    .zadanie img {
+      max-width: 100%;
+    }
+    .zadanie input {
+      padding: 6px;
+      margin-top: 10px;
+    }
+    .wynik {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div style="display: flex; align-items: center; justify-content: space-between; max-width: 500px;">
+  <h1 style="margin: 0;">Zadania</h1>
+  <button id="resetProgress" style="padding: 8px 12px; font-size: 14px;">🔄 Resetuj postęp</button>
+</div>
+<div id="message" style="margin-top: 20px; font-size: 1.2em; font-weight: bold;"></div>
+
+  <div class="zadanie" data-hash="ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d">
+    <h2>Ba.</h2>
+    <img src="Ba.jpg">
+    <p>Sześciokąt foremny. Jakie jest pole czworokąta oznaczone znakiem zapytania?</p>
+    <input type="text" placeholder="Twoja odpowiedź">
+    <button>Sprawdź</button>
+    <div class="wynik"></div>
+  </div>
+
+  <div class="zadanie" data-hash="ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306">
+    <h2>0.</h2>
+    <img src="0.png">
+    <p>Różowy, niebieski i żółty trojkąt są równoboczne. Ile wynosi suma pól oznaczona znakiem zapytania?</p>
+    <input type="text" placeholder="Twoja odpowiedź">
+    <button>Sprawdź</button>
+    <div class="wynik"></div>
+  </div>
+
+  <div class="zadanie" data-hash="484aa6ccd17c9fe96eb955b9b56ed0c883b275301479deec1b817afe2abdaf72">
+    <h2>Ra.</h2>
+    <img src="Ra.png">
+    <p>Na obrazku jest ta sama butelka, z tą samą ilością płynu, jaką część objętości butelki zajmuje płyn? Wynik podaj w ułamku używając /</p>
+    <input type="text" placeholder="X/X">
+    <button>Sprawdź</button>
+    <div class="wynik"></div>
+  </div>
+
+  <div class="zadanie" data-hash="4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5">
+    <h2>1.</h2>
+    <img src="1.png">
+    <p>Prostokąty są przystające. Jakie jest pole jednego prostokąta?</p>
+    <input type="text" placeholder="Twoja odpowiedź">
+    <button>Sprawdź</button>
+    <div class="wynik"></div>
+  </div>
+
+  <div class="zadanie" data-hash="238d678e3cd63c90f9cf6e4c40053aff32a7492915547ac574355c199233ff4d">
+    <h2>Rb.</h2>
+    <h4>Brak ilustracji, zadanie prof.</h4>
+    <p>Jaką część zajmuje litera F? Wynik podaj w ułamku używając /</p>
+    <input type="text" placeholder="X/X">
+    <button>Sprawdź</button>
+    <div class="wynik"></div>
+  </div>
+
+  <div class="zadanie" data-hash="4ec9599fc203d176a301536c2e091a19bc852759b255bd6818810a42c5fed14a">
+    <h2>2.</h2>
+    <img src="2.png">
+    <p>Jakie jest pole prostokąta?</p>
+    <input type="text" placeholder="Twoja odpowiedź">
+    <button>Sprawdź</button>
+    <div class="wynik"></div>
+  </div>
+
+  <script>
+  async function hashText(text) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+  }
+
+  const solved = JSON.parse(localStorage.getItem('solvedZadania') || '[]');
+  const allZadania = Array.from(document.querySelectorAll('.zadanie'));
+  const messageBox = document.getElementById('message');
+
+  let solvedCount = 0;
+
+  allZadania.forEach(zad => {
+    const input = zad.querySelector('input');
+    const button = zad.querySelector('button');
+    const wynik = zad.querySelector('.wynik');
+    const correctHash = zad.dataset.hash;
+    const img = zad.querySelector('img');
+    const fileName = img ? img.getAttribute('src') : zad.querySelector('h2').textContent;
+
+    // Hide solved
+    if (solved.includes(fileName)) {
+      zad.remove();
+      solvedCount++;
+      return;
+    }
+
+    button.addEventListener('click', async () => {
+      const odp = input.value.trim();
+      const odpHash = await hashText(odp);
+      if (odpHash === correctHash) {
+        wynik.textContent = '✅ Poprawna odpowiedź!';
+        wynik.style.color = 'green';
+
+        // Save progress
+        if (!solved.includes(fileName)) {
+          solved.push(fileName);
+          localStorage.setItem('solvedZadania', JSON.stringify(solved));
+        }
+
+        setTimeout(() => {
+          zad.remove();
+          solvedCount++;
+          checkIfAllSolved();
+        }, 1000);
+      } else {
+        wynik.textContent = '❌ Błędna odpowiedź.';
+        wynik.style.color = 'red';
+      }
+    });
+  });
+
+  // Reset button
+  document.getElementById('resetProgress').addEventListener('click', () => {
+    localStorage.removeItem('solvedZadania');
+    location.reload(); // Refresh to show all zadania again
+  });
+
+  function checkIfAllSolved() {
+    if (solvedCount === allZadania.length) {
+      messageBox.textContent = '🎉 Wszystkie zadania zostały rozwiązane!';
+    }
+  }
+
+  // Show message if already all solved
+  if (solvedCount === allZadania.length) {
+    messageBox.textContent = '🎉 Wszystkie zadania zostały rozwiązane!';
+  }
+</script>
+
+
+
+</body>
+</html>
